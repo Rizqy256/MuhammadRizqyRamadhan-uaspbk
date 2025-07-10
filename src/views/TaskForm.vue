@@ -13,7 +13,7 @@
         </h2>
       </div>
 
-      <form @submit.prevent="submit" class="task-form">
+      <form @submit.prevent="handleSubmit" class="task-form">
         <div class="form-group floating">
           <input 
             v-model="task.title" 
@@ -54,10 +54,13 @@
           </div>
         </div>
 
-        <button type="submit" class="submit-btn">
-          <span>{{ isEdit ? 'Update Tugas' : 'Simpan Tugas' }}</span>
+        <button type="submit" class="submit-btn" :disabled="isSubmitting">
+          <span v-if="!isSubmitting">{{ isEdit ? 'Update Tugas' : 'Simpan Tugas' }}</span>
+          <span v-else class="spinner"></span>
           <div class="btn-hover-effect"></div>
         </button>
+
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </form>
     </div>
   </div>
@@ -72,7 +75,10 @@ import { useTaskStore } from '../store/taskStore'
 const route = useRoute()
 const router = useRouter()
 const store = useTaskStore()
+
 const isEdit = route.params.id
+const isSubmitting = ref(false)
+const errorMessage = ref('')
 const task = ref({
   title: '',
   description: '',
@@ -81,10 +87,36 @@ const task = ref({
 
 onMounted(async () => {
   if (isEdit) {
-    const res = await axios.get(`http://localhost:3000/tasks/${route.params.id}`)
-    task.value = res.data
+    try {
+      const res = await axios.get(`http://localhost:3000/tasks/${route.params.id}`)
+      task.value = res.data
+    } catch (error) {
+      errorMessage.value = 'Gagal memuat data tugas'
+      console.error("Error loading task:", error)
+    }
   }
 })
+
+const handleSubmit = async () => {
+  if (isSubmitting.value) return
+  
+  isSubmitting.value = true
+  errorMessage.value = ''
+
+  try {
+    if (isEdit) {
+      await store.updateTask(route.params.id, task.value)
+    } else {
+      await store.addTask(task.value)
+    }
+    router.push('/')
+  } catch (error) {
+    errorMessage.value = 'Gagal menyimpan tugas. Silakan coba lagi.'
+    console.error("Error saving task:", error)
+  } finally {
+    isSubmitting.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -295,6 +327,16 @@ select.form-input {
   box-sizing: border-box;
 }
 
+.submit-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.submit-btn:disabled:hover .btn-hover-effect {
+  opacity: 0;
+}
+
 .submit-btn span {
   position: relative;
   z-index: 2;
@@ -311,13 +353,36 @@ select.form-input {
   transition: opacity 0.3s;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
-.submit-btn:hover .btn-hover-effect {
+.submit-btn:hover:not(:disabled) .btn-hover-effect {
   opacity: 1;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.error-message {
+  color: #ef4444;
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes underlineGrow {
