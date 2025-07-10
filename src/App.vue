@@ -1,0 +1,18 @@
+<template>
+  <div id="app">
+    <router-view />
+  </div>
+</template>
+
+<script setup>
+// Tidak perlu kode tambahan di sini
+</script>
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+</style>

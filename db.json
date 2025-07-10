@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "123"
+    },
+    {
+      "id": "d1d4",
+      "username": "rizqy",
+      "password": "rizqy123"
+    },
+    {
+      "id": "41dd",
+      "username": "tes",
+      "password": "tes123"
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Tugas PBO",
+      "description": "Kerjakan UML dan OOP",
+      "status": "todo"
+    },
+    {
+      "id": "9612",
+      "title": "PBK",
+      "description": "Ujian akhir semester",
+      "status": "in-progress"
+    }
+  ]
+}
